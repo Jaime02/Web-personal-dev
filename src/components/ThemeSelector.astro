@@ -1,0 +1,51 @@
+---
+import IconDarkTheme from "./icons/IconDarkTheme.astro";
+import IconLightTheme from "./icons/IconLightTheme.astro";
+---
+
+<button
+  id="theme-toggle"
+  class="flex size-10 items-center justify-center rounded-full hover:scale-[115%]"
+  aria-label="Theme toggle button"
+>
+  <IconLightTheme extraClasses="hidden dark:inline" />
+  <IconDarkTheme extraClasses="dark:hidden" />
+</button>
+
+<script>
+  function handleToggleClick() {
+    document.documentElement.classList.toggle("dark");
+    localStorage.setItem("theme", document.documentElement.classList.contains("dark") ? "dark" : "light");
+  }
+
+  function getTheme() {
+    if (typeof localStorage !== "undefined" && localStorage.getItem("theme")) {
+      return localStorage.getItem("theme") || "light";
+    }
+    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      return "dark";
+    }
+    return "light";
+  }
+
+  document.addEventListener(
+    "astro:page-load",
+    () => {
+      const theme = getTheme();
+      document.documentElement.classList.toggle("dark", theme === "dark");
+      localStorage.setItem("theme", theme);
+      document.getElementById("theme-toggle")?.addEventListener("click", handleToggleClick);
+    },
+    { once: true }
+  );
+
+  document.addEventListener("astro:after-swap", () => {
+    if (localStorage.getItem("theme") === "dark") {
+      document.documentElement.classList.toggle("dark", true);
+    }
+
+    if (!document.getElementById("theme-toggle")?.hasAttribute("onclick")) {
+      document.getElementById("theme-toggle").addEventListener("click", handleToggleClick);
+    }
+  });
+</script>
